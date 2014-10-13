@@ -17,7 +17,7 @@
 
 /* global window, document, define, jQuery, setInterval, clearInterval */
 
-(function(factory) {
+(function (factory) {
     'use strict';
     if (typeof define === 'function' && define.amd) {
         define(['jquery'], factory);
@@ -27,7 +27,7 @@
         factory(jQuery);
     }
 
-}(function($) {
+}(function ($) {
     'use strict';
     var Slick = window.Slick || {};
 
@@ -1546,13 +1546,16 @@
 
         xDist = _.touchObject.startX - _.touchObject.curX;
         yDist = _.touchObject.startY - _.touchObject.curY;
-        r = Math.atan2(yDist, xDist);
-
+        if (_.options.vertical === false) {
+            r = Math.atan2(yDist, xDist);
+        }
+        else{
+            r = Math.atan2(xDist, yDist);
+        }
         swipeAngle = Math.round(r * 180 / Math.PI);
         if (swipeAngle < 0) {
             swipeAngle = 360 - Math.abs(swipeAngle);
         }
-
         if ((swipeAngle <= 45) && (swipeAngle >= 0)) {
             return 'left';
         }
@@ -1662,12 +1665,22 @@
         _.touchObject.curX = touches !== undefined ? touches[0].pageX : event.clientX;
         _.touchObject.curY = touches !== undefined ? touches[0].pageY : event.clientY;
 
+        var startPoint, endPoint;
+        if(_.options.vertical === false){
+            startPoint = _.touchObject.startX;
+            endPoint = _.touchObject.curX;
+        }
+        else{
+            startPoint = _.touchObject.startY;
+            endPoint = _.touchObject.curY;
+       }
         _.touchObject.swipeLength = Math.round(Math.sqrt(
-            Math.pow(_.touchObject.curX - _.touchObject.startX, 2)));
+            Math.pow( endPoint - startPoint, 2)));
 
         swipeDirection = _.swipeDirection();
 
         if (swipeDirection === 'vertical') {
+            //should never get here!!!
             return;
         }
 
@@ -1675,7 +1688,7 @@
             event.preventDefault();
         }
 
-        positionOffset = _.touchObject.curX > _.touchObject.startX ? 1 : -1;
+        positionOffset = endPoint > startPoint ? 1 : -1;
 
         if (_.options.vertical === false) {
             _.swipeLeft = curLeft + _.touchObject.swipeLength * positionOffset;
